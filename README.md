@@ -28,8 +28,7 @@ Documentation du Déploiement Automatisé d'un site WordPress sur Google Cloud P
 ├── creation-inventory.sh
 ├── credentials.json
 ├── deploy.sh
-├── deployment-schema
-│   └── deployment-wordpress-gcp.drawio.png
+├── deployment-wordpress-gcp.drawio.png
 ├── ssh_keys
 ├── terraform
 │   ├── db_vm
@@ -87,7 +86,7 @@ Pour exécuter ce projet avec succès, vous devez vous assurer de disposer des �
 
 Voici le schéma permettant de visualiser le flux et l'inter-connection des différents ressources et services :
 
-![Alt text](deployment-schema/deployment-wordpress-gcp.drawio.png)
+![Alt text](deployment-wordpress-gcp.drawio.png)
 
 L'architecture se réalise en 2 VM, une pour `Wordpress` et une autre pour la `BDD MYSQL` :
 
