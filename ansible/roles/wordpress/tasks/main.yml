@@ -1,0 +1,91 @@
+---
+# Mise à jour des paquets
+- name: Mise à jour de la liste des paquets
+  apt:
+    update_cache: yes
+  become: true
+
+# Ajout référentiel Ondrej PPA
+- name: Ajouter le PPA PHP
+  apt_repository:
+    repo: ppa:ondrej/php
+
+# Installation de Apache, PHP et ses dépendances
+- name: Installer les paquets requis pour Apache (ou Nginx) et PHP
+  apt:
+    name: 
+    - apache2              # ou nginx
+    - php8.0
+    - php8.0-mysqli
+    - apt-transport-https
+    - mysql-server
+    state: present
+  become: true
+
+# Activation de l'extension MySQLi
+- name: Activer l'extension MySQLi
+  lineinfile:
+    path: /etc/php/8.0/apache2/php.ini
+    regexp: "^;?extension=mysqli$"
+    line: "extension=mysqli"
+  notify: redémarrer apache
+
+# Vérification si wordpress existant
+- name: "Vérification si wordpress existant"
+  stat:
+    path: "/var/www/html/wordpress"
+
+# Téléchargement de WordPress
+- name: Télécharger le package WordPress
+  get_url:
+    url: https://wordpress.org/latest.tar.gz
+    dest: /tmp/wordpress-latest.tar.gz
+
+# Pause de 3 secondes pour le téléchargement
+- name: Pause de 3 secondes
+  pause:
+    seconds: 3
+
+# Extraction des fichiers WordPress
+- name: Extraire les fichiers WordPress
+  unarchive:
+    src: /tmp/wordpress-latest.tar.gz
+    dest: /var/www/html
+    owner: www-data
+    group: www-data
+    remote_src: yes
+
+# Configuration de WordPress
+- name: Définir les permissions pour WordPress
+  file:
+    path: /var/www/html/wordpress
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+# Suppression fichier html par default d'apache
+- name: Suppression fichier html par default d'apache
+  file:
+    path: "/var/www/html/index.html"
+    state: absent
+
+# Vérification si wp-config-sample.php existant
+- name: Vérification si wp-config-sample.php existant
+  stat:
+    path: "/var/www/html/wordpress/wp-config-sample.php"
+  register: "check_file_sample"
+
+# Renommer wp-config-sample.php
+- name: Renommer wp-config-sample.php
+  command: mv /var/www/html/wordpress/wp-config-sample.php "/var/www/html/wordpress/wp-config.php"
+  when: check_file_sample.stat.exists == True
+
+# Configurer wp-config.php afin de connecter php à la base de donnée
+- name: Configurer wp-config.php
+  template:
+    src: wp-config.php.j2
+    dest: "/var/www/html/wordpress/wp-config.php"
+    mode: 0600
+    backup: 'true'
+    force: 'true'

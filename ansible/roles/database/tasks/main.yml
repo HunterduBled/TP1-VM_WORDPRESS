@@ -1,0 +1,63 @@
+---
+# Mise à jour des paquets
+- name: Mise à jour de la liste des paquets
+  apt:
+    update_cache: yes
+  become: true
+
+# Installation des dépendances mysql
+- name: MYSQL - Installer mysql
+  apt:
+    name:     
+      - mysql-server
+      - python3-pip
+    state: present
+
+# Installation pymysql via pip 
+- name: MYSQL - Install PyMySQL (Python3)
+  pip:
+    name: pymysql
+    state: present
+
+# Démarrer et activer mysql
+- name: MYSQL - Démarrer et activer mysql
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+# Changer mot de passe root la première fois
+- name: MYSQL - Changer le mot de passe de root
+  mysql_user:
+    name: root
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    password: "{{ mysql_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+# Création database wordpress
+- name: MYSQL - Créer la database
+  mysql_db:
+    name: "{{ mysql_db }}"
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    state: present
+
+# Création user pour la database
+- name: MYSQL - Créer un utilisateur
+  mysql_user:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    name: "{{ mysql_user }}"
+    password: "{{ mysql_password }}"
+    host: "%"
+    priv: "*.*:ALL"
+    state: present
+
+# Mettre à jour le bind-address dans mysqld.cnf
+- name: Mettre à jour le bind-address dans mysqld.cnf
+  lineinfile:
+    path : "/etc/mysql/mysql.conf.d/mysqld.cnf"
+    regexp: '^bind-address\s*='
+    line: 'bind-address = 0.0.0.0'
+  notify: restart mysql

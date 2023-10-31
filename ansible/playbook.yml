@@ -1,0 +1,26 @@
+---
+# Déploiement de WordPress
+- name: Deploy WordPress
+  hosts: wordpress-vm
+  remote_user:
+  gather_facts: false
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  roles:
+    - wordpress
+
+# Déploiement de MySQL
+- name: Deploy Database
+  hosts: db-vm
+  remote_user:
+  gather_facts: false
+  become: true
+
+  vars_files:
+    - vars.yml
+
+  roles:
+    - database

@@ -186,3 +186,5 @@ la commande est `./deploy.sh`
 ## Destruction de l'infrastructure
 
 Pour détruire l'infrastructure que vous avez créée à l'aide de Terraform, exécutez le script `terraform-destroy.sh` en utilisant la commande suivante : `./terraform-destroy.sh`
+
+J'ai vidé toutes les variables qui dépendant du compte ou de la machine de l'utilisateur.
